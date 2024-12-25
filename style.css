@@ -737,6 +737,20 @@ section {
 .social-link {
     color: var(--primary-color);
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: transform 0.2s ease;
+}
+
+.social-link i {
+    font-size: 1.35em;
+}
+
+.social-link:hover {
+    transform: scale(1.1);
 }
 
 /* Bushes Section */
