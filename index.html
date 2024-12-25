@@ -473,34 +473,50 @@
                 const fname = $('#mce-FNAME').val();
                 const lname = $('#mce-LNAME').val();
                 
-                // Create URL
-                const baseUrl = 'https://winfornature.us21.list-manage.com/subscribe/post-json';
-                const params = new URLSearchParams({
-                    u: '80950980b71fb6c268907db15',
-                    id: '1f102e462e',
-                    f_id: '00f2f0e6f0',
-                    c: 'mailchimpCallback',
-                    EMAIL: email,
-                    FNAME: fname,
-                    LNAME: lname
+                // First check if email exists
+                const checkUrl = `https://winfornature.us21.list-manage.com/subscribe/post-json?u=80950980b71fb6c268907db15&id=1f102e462e&EMAIL=${encodeURIComponent(email)}&c=?`;
+                
+                $.ajax({
+                    url: checkUrl,
+                    dataType: 'jsonp',
+                    success: function(checkResponse) {
+                        if (checkResponse.msg && checkResponse.msg.includes('already subscribed')) {
+                            submitButton.prop('disabled', false);
+                            showPopup('Already Subscribed', 'This email address is already subscribed to our mailing list.');
+                            return;
+                        }
+                        
+                        // If not subscribed, proceed with subscription
+                        const subscribeUrl = 'https://winfornature.us21.list-manage.com/subscribe/post-json';
+                        const params = new URLSearchParams({
+                            u: '80950980b71fb6c268907db15',
+                            id: '1f102e462e',
+                            f_id: '00f2f0e6f0',
+                            c: 'mailchimpCallback',
+                            EMAIL: email,
+                            FNAME: fname,
+                            LNAME: lname
+                        });
+                        
+                        const script = document.createElement('script');
+                        script.src = subscribeUrl + '?' + params.toString();
+                        
+                        script.onerror = function() {
+                            submitButton.prop('disabled', false);
+                            showPopup('Error', 'There was an error connecting to our subscription service. Please try again later.');
+                        };
+                        
+                        script.onload = function() {
+                            document.body.removeChild(script);
+                        };
+                        
+                        document.body.appendChild(script);
+                    },
+                    error: function() {
+                        submitButton.prop('disabled', false);
+                        showPopup('Error', 'There was an error checking your subscription status. Please try again later.');
+                    }
                 });
-                
-                const url = baseUrl + '?' + params.toString();
-                
-                // Add script to page
-                const script = document.createElement('script');
-                script.src = url;
-                script.onerror = function() {
-                    submitButton.prop('disabled', false);
-                    showPopup('Error', 'There was an error connecting to our subscription service. Please try again later.');
-                };
-                
-                // Clean up script tag
-                script.onload = function() {
-                    document.body.removeChild(script);
-                };
-                
-                document.body.appendChild(script);
             });
         });
     </script>
