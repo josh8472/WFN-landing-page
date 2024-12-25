@@ -45,6 +45,23 @@ body {
 img {
     max-width: 100%;
     height: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    
+    * {
+        -webkit-transition: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
 }
 
 /* Typography */
@@ -82,30 +99,58 @@ section {
     right: 0;
     background: white;
     padding: 1rem;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
     justify-content: space-between;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
     align-items: center;
     z-index: 1000;
+    -webkit-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
 }
 
 .logo-horizontal {
-    height: 50px;
+    height: 37.5px;
 }
 
 /* Hero Section */
 .hero {
     min-height: 100vh;
     background-image: url('assets/images/david-clode-DNGC_M-Bvsk-unsplash-scaled.jpg');
+    -webkit-background-size: cover;
     background-size: cover;
     background-position: center;
+    background-color: var(--primary-color); /* Fallback before image loads */
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
     align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
     justify-content: center;
     text-align: center;
     color: var(--light-text);
     position: relative;
     margin-top: 70px;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+@media (max-width: 768px) {
+    .hero {
+        background-attachment: scroll;
+    }
 }
 
 .hero::before {
@@ -139,7 +184,22 @@ section {
     border-radius: 5px;
     font-weight: bold;
     text-transform: uppercase;
-    transition: background-color 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.cta-button:active {
+    -webkit-transform: scale(0.98);
+    transform: scale(0.98);
 }
 
 .cta-button:hover {
@@ -154,9 +214,19 @@ section {
 .welcome-container {
     max-width: var(--max-width);
     margin: 0 auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
     align-items: center;
     gap: var(--spacing-lg);
+}
+
+@supports not (gap: var(--spacing-lg)) {
+    .welcome-container > * {
+        margin: calc(var(--spacing-lg) / 2);
+    }
 }
 
 .welcome-image {
@@ -336,6 +406,7 @@ section {
     background-image: url('assets/images/coffee_pouring.jpg');
     background-size: cover;
     background-position: center;
+    background-color: #333; /* Fallback before image loads */
     color: var(--light-text);
     text-align: center;
     padding: var(--spacing-lg) var(--spacing-sm);
@@ -376,11 +447,33 @@ section {
 }
 
 .subscription-tiers {
+    display: -ms-grid;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
     max-width: var(--max-width);
     margin: var(--spacing-lg) auto;
+}
+
+@supports not (display: grid) {
+    .subscription-tiers {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+    }
+    
+    .tier {
+        -webkit-box-flex: 1;
+        -ms-flex: 1 1 220px;
+        flex: 1 1 220px;
+        max-width: 300px;
+        margin: 0.5rem;
+    }
 }
 
 .tier {
@@ -452,13 +545,13 @@ section {
 }
 
 .coffee-image {
-    width: 28px;
+    width: 21px;
     height: auto;
 }
 
 /* Specific size for Restoration Ranger tier coffee image */
 .tier:last-child .coffee-image {
-    width: 52px;
+    width: 39px;
 }
 
 .daily-price {
@@ -565,6 +658,12 @@ section {
     padding: var(--spacing-sm);
     border: 1px solid #ddd;
     border-radius: 5px;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.faq-accordion details[open] {
+    background: var(--background-light);
 }
 
 .faq-accordion summary {
@@ -572,6 +671,24 @@ section {
     font-weight: bold;
     padding: var(--spacing-sm);
     position: relative;
+    list-style: none;
+    outline: none;
+}
+
+.faq-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-accordion summary::after {
+    content: '+';
+    position: absolute;
+    right: var(--spacing-sm);
+    -webkit-transition: -webkit-transform 0.3s ease;
+    transition: transform 0.3s ease;
+}
+
+.faq-accordion details[open] summary::after {
+    content: '-';
 }
 
 .faq-accordion details p {
@@ -598,6 +715,17 @@ section {
     padding: 0.8rem;
     border: 1px solid #ddd;
     border-radius: 5px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 16px; /* Prevent iOS zoom on focus */
+}
+
+@supports (-webkit-overflow-scrolling: touch) {
+    /* iOS-specific styles */
+    .contact-form input {
+        padding: 1rem;
+    }
 }
 
 .social-links {
@@ -683,7 +811,35 @@ section {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media screen and (min-width: 1024px) {
+    .subscription-tiers {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media screen and (max-width: 1023px) and (min-width: 769px) {
+    .subscription-tiers {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .subscription-tiers {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Improve touch targets on mobile */
+    .cta-button,
+    .faq-accordion summary,
+    .contact-form input,
+    .social-link {
+        min-height: 44px;
+        padding: 12px 24px;
+    }
+
+    .benefit {
+        min-height: 44px;
+    }
     h1 {
         font-size: 2rem;
     }
@@ -707,7 +863,7 @@ section {
     }
 
     .logo-horizontal {
-        height: 40px;
+        height: 30px;
     }
 
     .cta-button {
