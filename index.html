@@ -419,67 +419,63 @@
     </div>
 
     <script>
-        window.addEventListener('DOMContentLoaded', (event) => {
-            const form = document.getElementById('mc-embedded-subscribe-form');
-            const popup = document.getElementById('popup');
-            const popupTitle = document.getElementById('popup-title');
-            const popupMessage = document.getElementById('popup-message');
+        $(document).ready(function() {
+            const form = $('#mc-embedded-subscribe-form');
+            const popup = $('#popup');
+            const popupTitle = $('#popup-title');
+            const popupMessage = $('#popup-message');
 
-            form.addEventListener('submit', function(e) {
+            form.submit(function(e) {
                 e.preventDefault();
                 
-                const submitButton = form.querySelector('#mc-embedded-subscribe');
-                submitButton.disabled = true;
+                const submitButton = $('#mc-embedded-subscribe');
+                submitButton.prop('disabled', true);
                 
-                const formData = new FormData(form);
-                const searchParams = new URLSearchParams();
+                // Convert form to AJAX
+                const $form = $(this);
+                const url = $form.attr('action').replace('/post?', '/post-json?') + '&c=?';
                 
-                for (let pair of formData.entries()) {
-                    searchParams.append(pair[0], pair[1]);
-                }
-
-                const url = form.action + '&' + searchParams.toString();
-                
-                const script = document.createElement('script');
-                script.src = url;
-                document.body.appendChild(script);
-                
-                script.onload = function() {
-                    document.body.removeChild(script);
-                };
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    data: $form.serialize(),
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(response) {
+                        submitButton.prop('disabled', false);
+                        
+                        if (response.result === 'success') {
+                            showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
+                            form[0].reset();
+                        } else {
+                            // Check for specific error messages
+                            if (response.msg.includes('already subscribed')) {
+                                showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
+                            } else {
+                                showPopup('Oops!', response.msg);
+                            }
+                        }
+                    },
+                    error: function(err) {
+                        submitButton.prop('disabled', false);
+                        showPopup('Error', 'There was an error subscribing. Please try again later.');
+                    }
+                });
             });
         });
 
         function closePopup() {
-            document.getElementById('popup').classList.remove('show');
+            $('#popup').removeClass('show');
         }
 
         function showPopup(title, message) {
-            const popup = document.getElementById('popup');
-            const popupTitle = document.getElementById('popup-title');
-            const popupMessage = document.getElementById('popup-message');
+            const popup = $('#popup');
+            const popupTitle = $('#popup-title');
+            const popupMessage = $('#popup-message');
             
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
-            popup.classList.add('show');
-        }
-
-        // Mailchimp callback function
-        function jsonp(response) {
-            const submitButton = document.querySelector('#mc-embedded-subscribe');
-            submitButton.disabled = false;
-
-            if (response.result === 'success') {
-                showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
-                document.getElementById('mc-embedded-subscribe-form').reset();
-            } else {
-                // Check for specific error messages
-                if (response.msg.includes('already subscribed')) {
-                    showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
-                } else {
-                    showPopup('Oops!', response.msg);
-                }
-            }
+            popupTitle.text(title);
+            popupMessage.text(message);
+            popup.addClass('show');
         }
     </script>
 
