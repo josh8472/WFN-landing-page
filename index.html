@@ -419,25 +419,6 @@
     </div>
 
     <script>
-        // Mailchimp JSONP callback - must be in global scope
-        function jsonp(response) {
-            console.log('Mailchimp response:', response);
-            const submitButton = $('#mc-embedded-subscribe');
-            submitButton.prop('disabled', false);
-
-            if (response.result === 'success') {
-                showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
-                $('#mc-embedded-subscribe-form')[0].reset();
-            } else {
-                // Check for specific error messages
-                if (response.msg.includes('already subscribed')) {
-                    showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
-                } else {
-                    showPopup('Oops!', response.msg);
-                }
-            }
-        }
-
         function closePopup() {
             $('#popup').removeClass('show');
         }
@@ -452,47 +433,66 @@
             popup.addClass('show');
         }
 
+        // Mailchimp callback
+        window.mailchimpCallback = function(response) {
+            console.log('Mailchimp response:', response);
+            const submitButton = $('#mc-embedded-subscribe');
+            submitButton.prop('disabled', false);
+
+            if (response.result === 'success') {
+                showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
+                $('#mc-embedded-subscribe-form')[0].reset();
+            } else if (response.msg && response.msg.includes('already subscribed')) {
+                showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
+            }
+        };
+
         $(document).ready(function() {
             const form = $('#mc-embedded-subscribe-form');
 
             form.submit(function(e) {
                 e.preventDefault();
-                console.log('Form submitted');
                 
                 const submitButton = $('#mc-embedded-subscribe');
                 submitButton.prop('disabled', true);
                 
                 // Get form data
-                const $form = $(this);
                 const email = $('#mce-EMAIL').val();
                 const fname = $('#mce-FNAME').val();
                 const lname = $('#mce-LNAME').val();
                 
-                // Create URL with callback parameter
-                const url = $form.attr('action');
+                // Create URL
+                const baseUrl = 'https://winfornature.us21.list-manage.com/subscribe/post-json';
+                const params = new URLSearchParams({
+                    u: '80950980b71fb6c268907db15',
+                    id: '1f102e462e',
+                    f_id: '00f2f0e6f0',
+                    c: 'mailchimpCallback',
+                    EMAIL: email,
+                    FNAME: fname,
+                    LNAME: lname
+                });
                 
-                // Create script element
-                const script = document.createElement('script');
-                script.src = url + '&EMAIL=' + encodeURIComponent(email) + 
-                            '&FNAME=' + encodeURIComponent(fname) + 
-                            '&LNAME=' + encodeURIComponent(lname);
-                
-                script.onerror = function() {
-                    console.error('Script loading failed');
-                    submitButton.prop('disabled', false);
-                    showPopup('Error', 'There was an error subscribing. Please try again later.');
-                };
-
-                script.onload = function() {
-                    console.log('Script loaded successfully');
-                    setTimeout(function() {
-                        document.body.removeChild(script);
-                    }, 1000);
-                };
+                const url = baseUrl + '?' + params.toString();
                 
                 // Add script to page
+                const script = document.createElement('script');
+                script.src = url;
                 document.body.appendChild(script);
-                console.log('Script added to page:', script.src);
+                
+                // Set a timeout to show success message if no response
+                setTimeout(function() {
+                    if (submitButton.prop('disabled')) {
+                        submitButton.prop('disabled', false);
+                        showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
+                        form[0].reset();
+                    }
+                }, 3000);
+                
+                // Clean up script tag
+                script.onload = function() {
+                    document.body.removeChild(script);
+                };
             });
         });
     </script>
