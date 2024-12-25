@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -366,7 +367,7 @@
     <!-- Contact Section -->
     <section class="contact" id="mailchimp">
         <div id="mc_embed_signup" class="contact-form">
-            <form action="https://winfornature.us21.list-manage.com/subscribe/post-json?u=80950980b71fb6c268907db15&amp;id=1f102e462e&amp;f_id=00f2f0e6f0&amp;c=?" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate">
+            <form action="https://winfornature.us21.list-manage.com/subscribe/post-json?u=80950980b71fb6c268907db15&amp;id=1f102e462e&amp;f_id=00f2f0e6f0&amp;c=mailchimpCallback" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate">
                 <div id="mc_embed_signup_scroll">
                     <div class="name-fields">
                         <div class="mc-field-group">
@@ -442,8 +443,19 @@
             if (response.result === 'success') {
                 showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
                 $('#mc-embedded-subscribe-form')[0].reset();
-            } else if (response.msg && response.msg.includes('already subscribed')) {
-                showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
+            } else {
+                // Handle different error cases
+                if (response.msg) {
+                    if (response.msg.includes('already subscribed')) {
+                        showPopup('Already Subscribed', 'This email address is already subscribed to our mailing list.');
+                    } else if (response.msg.includes('invalid email')) {
+                        showPopup('Invalid Email', 'Please enter a valid email address.');
+                    } else {
+                        showPopup('Error', response.msg);
+                    }
+                } else {
+                    showPopup('Error', 'There was an error processing your subscription. Please try again later.');
+                }
             }
         };
 
@@ -478,21 +490,17 @@
                 // Add script to page
                 const script = document.createElement('script');
                 script.src = url;
-                document.body.appendChild(script);
-                
-                // Set a timeout to show success message if no response
-                setTimeout(function() {
-                    if (submitButton.prop('disabled')) {
-                        submitButton.prop('disabled', false);
-                        showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
-                        form[0].reset();
-                    }
-                }, 3000);
+                script.onerror = function() {
+                    submitButton.prop('disabled', false);
+                    showPopup('Error', 'There was an error connecting to our subscription service. Please try again later.');
+                };
                 
                 // Clean up script tag
                 script.onload = function() {
                     document.body.removeChild(script);
                 };
+                
+                document.body.appendChild(script);
             });
         });
     </script>
