@@ -40,6 +40,9 @@ body {
     color: #333; /* Fallback for browsers that don't support CSS variables */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
 }
 
 img {
@@ -310,11 +313,16 @@ section {
 
 /* Land Problem Section */
 .land-problem {
-    width: 100vw;
-    margin-left: calc((100% - 100vw) / 2);
+    position: relative;
+    width: 100%;
     background-color: var(--primary-color);
     color: var(--light-text);
     padding: var(--spacing-lg) 0;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    box-sizing: border-box;
 }
 
 .land-problem > div {
