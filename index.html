@@ -366,7 +366,7 @@
     <!-- Contact Section -->
     <section class="contact" id="mailchimp">
         <div id="mc_embed_signup" class="contact-form">
-            <form action="https://winfornature.us21.list-manage.com/subscribe/post?u=80950980b71fb6c268907db15&amp;id=1f102e462e&amp;f_id=00f2f0e6f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+            <form action="https://winfornature.us21.list-manage.com/subscribe/post-json?u=80950980b71fb6c268907db15&amp;id=1f102e462e&amp;f_id=00f2f0e6f0&amp;c=?" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate">
                 <div id="mc_embed_signup_scroll">
                     <div class="name-fields">
                         <div class="mc-field-group">
@@ -408,6 +408,80 @@
             </div>
         </div>
     </section>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <h3 id="popup-title"></h3>
+            <p id="popup-message"></p>
+            <button onclick="closePopup()" class="cta-button">Close</button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const form = document.getElementById('mc-embedded-subscribe-form');
+            const popup = document.getElementById('popup');
+            const popupTitle = document.getElementById('popup-title');
+            const popupMessage = document.getElementById('popup-message');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitButton = form.querySelector('#mc-embedded-subscribe');
+                submitButton.disabled = true;
+                
+                const formData = new FormData(form);
+                const searchParams = new URLSearchParams();
+                
+                for (let pair of formData.entries()) {
+                    searchParams.append(pair[0], pair[1]);
+                }
+
+                const url = form.action + '&' + searchParams.toString();
+                
+                const script = document.createElement('script');
+                script.src = url;
+                document.body.appendChild(script);
+                
+                script.onload = function() {
+                    document.body.removeChild(script);
+                };
+            });
+        });
+
+        function closePopup() {
+            document.getElementById('popup').classList.remove('show');
+        }
+
+        function showPopup(title, message) {
+            const popup = document.getElementById('popup');
+            const popupTitle = document.getElementById('popup-title');
+            const popupMessage = document.getElementById('popup-message');
+            
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
+            popup.classList.add('show');
+        }
+
+        // Mailchimp callback function
+        function jsonp(response) {
+            const submitButton = document.querySelector('#mc-embedded-subscribe');
+            submitButton.disabled = false;
+
+            if (response.result === 'success') {
+                showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
+                document.getElementById('mc-embedded-subscribe-form').reset();
+            } else {
+                // Check for specific error messages
+                if (response.msg.includes('already subscribed')) {
+                    showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
+                } else {
+                    showPopup('Oops!', response.msg);
+                }
+            }
+        }
+    </script>
 
     <!-- Bushes Section -->
     <section class="bushes">
