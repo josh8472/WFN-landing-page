@@ -419,14 +419,45 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            const form = $('#mc-embedded-subscribe-form');
+        // Mailchimp JSONP callback - must be in global scope
+        function jsonp(response) {
+            console.log('Mailchimp response:', response);
+            const submitButton = $('#mc-embedded-subscribe');
+            submitButton.prop('disabled', false);
+
+            if (response.result === 'success') {
+                showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
+                $('#mc-embedded-subscribe-form')[0].reset();
+            } else {
+                // Check for specific error messages
+                if (response.msg.includes('already subscribed')) {
+                    showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
+                } else {
+                    showPopup('Oops!', response.msg);
+                }
+            }
+        }
+
+        function closePopup() {
+            $('#popup').removeClass('show');
+        }
+
+        function showPopup(title, message) {
             const popup = $('#popup');
             const popupTitle = $('#popup-title');
             const popupMessage = $('#popup-message');
+            
+            popupTitle.text(title);
+            popupMessage.text(message);
+            popup.addClass('show');
+        }
+
+        $(document).ready(function() {
+            const form = $('#mc-embedded-subscribe-form');
 
             form.submit(function(e) {
                 e.preventDefault();
+                console.log('Form submitted');
                 
                 const submitButton = $('#mc-embedded-subscribe');
                 submitButton.prop('disabled', true);
@@ -446,48 +477,24 @@
                             '&FNAME=' + encodeURIComponent(fname) + 
                             '&LNAME=' + encodeURIComponent(lname);
                 
+                script.onerror = function() {
+                    console.error('Script loading failed');
+                    submitButton.prop('disabled', false);
+                    showPopup('Error', 'There was an error subscribing. Please try again later.');
+                };
+
+                script.onload = function() {
+                    console.log('Script loaded successfully');
+                    setTimeout(function() {
+                        document.body.removeChild(script);
+                    }, 1000);
+                };
+                
                 // Add script to page
                 document.body.appendChild(script);
-                
-                // Remove script after execution
-                script.onload = function() {
-                    document.body.removeChild(script);
-                };
+                console.log('Script added to page:', script.src);
             });
-
-            // Mailchimp JSONP callback
-            window.jsonp = function(response) {
-                console.log('Mailchimp response:', response);
-                const submitButton = $('#mc-embedded-subscribe');
-                submitButton.prop('disabled', false);
-
-                if (response.result === 'success') {
-                    showPopup('Thank You!', 'You have successfully subscribed to our mailing list.');
-                    $('#mc-embedded-subscribe-form')[0].reset();
-                } else {
-                    // Check for specific error messages
-                    if (response.msg.includes('already subscribed')) {
-                        showPopup('Already Subscribed', 'This email is already subscribed to our mailing list.');
-                    } else {
-                        showPopup('Oops!', response.msg);
-                    }
-                }
-            };
         });
-
-        function closePopup() {
-            $('#popup').removeClass('show');
-        }
-
-        function showPopup(title, message) {
-            const popup = $('#popup');
-            const popupTitle = $('#popup-title');
-            const popupMessage = $('#popup-message');
-            
-            popupTitle.text(title);
-            popupMessage.text(message);
-            popup.addClass('show');
-        }
     </script>
 
     <!-- Bushes Section -->
