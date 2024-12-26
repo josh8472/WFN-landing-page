@@ -314,7 +314,7 @@ section {
 /* Land Problem Section */
 .land-problem {
     position: relative;
-    width: 100%;
+    width: 100vw;
     background-color: var(--primary-color);
     color: var(--light-text);
     padding: var(--spacing-lg) 0;
@@ -325,7 +325,7 @@ section {
     box-sizing: border-box;
 }
 
-.land-problem > div {
+.land-container {
     display: flex;
     max-width: var(--max-width);
     margin: 0 auto;
